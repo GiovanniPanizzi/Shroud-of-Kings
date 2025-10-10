@@ -1,0 +1,28 @@
+The king:
+    Se ucciso il gioco finisce e la squadra avversaria vince.
+    Deve raccogliere reliquie sparse per il labirinto per potenziare la squadra o guadagnare vantaggi strategici di spazio.
+    Abilità: Vince contro tutti a parte per il regicida.
+
+The Regicide:
+    Debole, ma è l'unico che può uccidere il re.
+    Abilità: invisibilità per 3 secondi
+Ace:
+    Vince contro tutti a parte il re
+    Abilità: corsa rapida
+Guardiano:
+    Protegge il re, meno forte dell'asso, più dell'illusionista o regicida
+    Abilità: Scudo protettivo temporaneo ai vicini
+Illusionist:
+    Molto debole, ma può creare Illusioni
+    Abilità: invisibilità lunga, ombre, crea figure che non esistono
+Phantom:
+    Non può uccidere, non può essere ucciso ma può subire incantesimi
+    Abilità: passa attraverso i muri, può dare indicazioni alla squadra
+
+
+EXTRA:
+    Uno di essi, a parte re e regicida, potrà essere il traditore, che ha lo scopo di far vincere la squadra avversaria
+    Potrà attivare le abilità a favore di entrambe le squadre
+
+
+
