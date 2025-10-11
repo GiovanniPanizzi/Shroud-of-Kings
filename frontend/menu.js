@@ -1,20 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
-
-
-/* CREATE OR USE ID */
-let deviceId = localStorage.getItem('deviceId');
-if (!deviceId) {
-    deviceId = crypto.randomUUID();
-    localStorage.setItem('deviceId', deviceId);
-}
-fetch('http://localhost:8080/find-lobby', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ deviceId: deviceId })
-});
-console.log("Device ID:", deviceId);
-
 /* CREATE CANVAS USING THREE */
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -129,7 +114,7 @@ sphere.userData.velocity = 0;
 
 function updateLightFromMouse() {
     // mouse.x e mouse.y in NDC (-1..1)
-    const vector = new THREE.Vector3(mouse.x, 1, mouse.y); // z = 0.5 -> mezzo del frustum
+    const vector = new THREE.Vector3(mouse.x, 1 , mouse.y); // z = 0.5 -> mezzo del frustum
     vector.unproject(camera); // trasforma in coordinate mondo
 
     // distanza dalla camera (puoi regolarla)
@@ -143,7 +128,32 @@ function updateLightFromMouse() {
 /* LOBBY REQUEST */
 
 function lobbyRequest() {
-    console .log("Lobby requested");
+    console.log("Lobby requested");
+
+    // crea una connessione WebSocket al server
+    const ws = new WebSocket("ws://localhost:9002/");
+
+    // evento quando la connessione viene aperta
+    ws.onopen = () => {
+        console.log("Connesso al server WebSocket");
+        // eventualmente inviare un messaggio al server
+        ws.send(JSON.stringify({ action: "joinLobby" }));
+    };
+
+    // evento quando arriva un messaggio dal server
+    ws.onmessage = (event) => {
+        console.log("Messaggio dal server:", event.data);
+    };
+
+    // evento quando la connessione viene chiusa
+    ws.onclose = () => {
+        console.log("Connessione chiusa");
+    };
+
+    // evento per errori
+    ws.onerror = (err) => {
+        console.error("Errore WebSocket:", err);
+    };
 }
 
 function animate() {
