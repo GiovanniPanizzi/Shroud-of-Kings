@@ -1,4 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+import * as THREE from './libs/three.js/build/three.module.js';
+import { GLTFLoader } from './libs/three.js/examples/jsm/loaders/GLTFLoader.js';
 
 /* CREATE CANVAS USING THREE */
 const renderer = new THREE.WebGLRenderer();
@@ -61,6 +62,33 @@ const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 sphere.position.set(2, 4, 3);
 scene.add(sphere);
 sphere.castShadow = true;
+
+/* CREATE MEDIEVAL GUY 3D */
+const loader = new GLTFLoader();
+let skeleton; // scheletro globale
+let mixer;
+
+// Caricamento modello
+loader.load('./models/medieval_guy.glb', function(gltf) {
+    const model = gltf.scene;
+    model.scale.set(0.01, 0.01, 0.01);
+    scene.add(model);
+
+    let skinnedMesh;
+    model.traverse((child) => {
+        if (child.isSkinnedMesh) skinnedMesh = child;
+    });
+
+    if (skinnedMesh) {
+        skeleton = skinnedMesh.skeleton; // ora globale
+    }
+
+    // Se ci sono animazioni nel modello, puoi usarle (opzionale)
+    if (gltf.animations && gltf.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(model);
+        gltf.animations.forEach(clip => mixer.clipAction(clip).play());
+    }
+});
 
 /* FLOOR */
 const planeGeometry = new THREE.PlaneGeometry(20, 20);
@@ -157,59 +185,57 @@ function lobbyRequest() {
 }
 
 function animate() {
-    camera.position.x = Math.sin(Date.now() * 0.001) * 5;
-    camera.lookAt(0, 0, box.position.z);
-    border.lookAt(camera.position);
-    renderer.render(scene, camera);
-    camera.position.z = Math.cos(Date.now() * 0.001) * 5;
-    box.position.x = Math.sin(Date.now() * 0.001) * 2;
+    requestAnimationFrame(animate);
 
+    // aggiornamento mixer animazioni (se ci sono)
+    if (mixer) mixer.update(0.01);
+
+    // Movimento camera
+    camera.position.x = Math.sin(Date.now() * 0.001) * 5;
+    camera.position.z = Math.cos(Date.now() * 0.001) * 5;
+    camera.lookAt(0, 0, 0);
+
+    // Movimento box
+    box.position.x = Math.sin(Date.now() * 0.001) * 2;
     box.rotation.x += 0.01;
     box.rotation.z += 0.01;
 
-    /* SPHERE BOUNCING */
-
-    if(sphere.position.y <= -0.5){
+    // Bouncing sfera
+    if (sphere.position.y <= -0.5) {
         sphere.userData.velocity = -sphere.userData.velocity;
-    }
-    else{
+    } else {
         sphere.userData.velocity -= 0.01;
     }
-
     sphere.position.y += sphere.userData.velocity;
 
-    /* LIGHT FOLLOWS MOUSE */
+    // Luce segue mouse
     updateLightFromMouse();
 
     // Raycasting
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObject(plane);
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = intersects.length > 0 ? 'blue' : 'white';
+    ctx.font = 'bold 30px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Find Lobby', canvas.width / 2, canvas.height / 2);
     texture.needsUpdate = true;
 
-    boxMaterial.color.setHSL((Date.now() * 0.0001) % 1, 1, 0.5);
-    requestAnimationFrame(animate);
-
+    // Plane e bordo guardano la camera
     plane.lookAt(camera.position);
-    if (intersects.length > 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // cancella il vecchio testo
-        ctx.fillStyle = 'blue';
-        ctx.font = 'bold 30px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Find Lobby', canvas.width / 2, canvas.height / 2);
-    
-        // Aggiorna la texture
-        texture.needsUpdate = true;
-    } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 30px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Find Lobby', canvas.width / 2, canvas.height / 2);
-        texture.needsUpdate = true;
+    border.lookAt(camera.position);
+
+    // Animazione ossa scheletro
+    if (skeleton) {
+        const rightHand = skeleton.getBoneByName('mixamorigRightHand_035');
+        const head = skeleton.getBoneByName('mixamorigHead_06');
+        if (rightHand) rightHand.rotation.z = Math.sin(Date.now() * 0.002) * 1; // mano destra
+        if (head) head.rotation.y = Math.sin(Date.now() * 0.0015) * 0.5;       // testa
     }
+
+    renderer.render(scene, camera);
 }
 
 animate();

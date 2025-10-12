@@ -5,9 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js Vanilla</title>
     <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "./libs/three.js/build/three.module.js",
+            "three/addons/": "./libs/three.js/examples/jsm/"
+          }
+        }
+        </script>
 </head>
 <body>
-    <script type="module" src="menu.js"></script>
+    <script type="module" src="./menu.js"></script>
     <button class="full-screen">full screen</button>
 </body>
 </html>

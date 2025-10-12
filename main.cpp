@@ -16,6 +16,7 @@ std::string getContentType(const std::string &path) {
     if (endsWith(path, ".js")) return "application/javascript";
     if (endsWith(path, ".png")) return "image/png";
     if (endsWith(path, ".jpg") || endsWith(path, ".jpeg")) return "image/jpeg";
+    if (endsWith(path, ".glb")) return "model/gltf-binary";
     return "text/plain";
 }
 
@@ -44,7 +45,7 @@ int main() {
         .close = [](auto *ws, int, std::string_view){ std::cout << "Connessione chiusa\n"; }
     })
     .listen(9002, [](auto *token){ 
-        if(token) std::cout << "Server attivo su 9002\n"; 
+        if(token) std::cout << "Server attivo su http://localhost:9002/\n"; 
     })
     .run();
 }
