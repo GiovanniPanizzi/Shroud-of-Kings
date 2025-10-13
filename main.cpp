@@ -24,16 +24,13 @@ std::string getContentType(const std::string &path) {
 std::vector<std::string> parseMosse(const std::string& input) {
     std::vector<std::string> mosse;
     size_t start = 0;
-    size_t end = input.find('/');
+    size_t end = input.find(';');
     while (end != std::string::npos) {
         mosse.push_back(input.substr(start, end - start));
         start = end + 1;
-        end = input.find('/', start);
+        end = input.find(';', start);
     }
     mosse.push_back(input.substr(start));
-    if (mosse.size() != 5) {
-        std::cerr << "Attenzione: il numero di mosse non è 5!\n";
-    }
     return mosse;
 }
 
@@ -70,11 +67,13 @@ int main() {
 
             // Puoi aggiornare la posizione del player
             // esempio semplice:
-            if (msg == "move_forward;")  data->player->moveForward();
-            if (msg == "move_backward;")     data->player->moveBack();
-            if (msg == "move_left;")     data->player->moveLeft();
-            if (msg == "move_right;")    data->player->moveRight();
-
+            std::vector<std::string> mosse = parseMosse(std::string(msg));
+            for(const auto& mossa : mosse) {
+                if (mossa == "move_forward")     data->player->moveForward();
+                if (mossa == "move_backward")    data->player->moveBack();
+                if (mossa == "move_left")        data->player->moveLeft();
+                if (mossa == "move_right")       data->player->moveRight();
+            }
             std::string risposta = data->player->getStats();
             ws->send(risposta, op);
         },
