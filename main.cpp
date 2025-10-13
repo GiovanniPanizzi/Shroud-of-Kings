@@ -2,8 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "Player.hpp"
 
-struct PerConnection {};
+struct PerConnection {Player* player;};
 
 bool endsWith(const std::string &str, const std::string &suffix) {
     return str.size() >= suffix.size() &&
@@ -20,13 +21,29 @@ std::string getContentType(const std::string &path) {
     return "text/plain";
 }
 
+std::vector<std::string> parseMosse(const std::string& input) {
+    std::vector<std::string> mosse;
+    size_t start = 0;
+    size_t end = input.find('/');
+    while (end != std::string::npos) {
+        mosse.push_back(input.substr(start, end - start));
+        start = end + 1;
+        end = input.find('/', start);
+    }
+    mosse.push_back(input.substr(start));
+    if (mosse.size() != 5) {
+        std::cerr << "Attenzione: il numero di mosse non è 5!\n";
+    }
+    return mosse;
+}
+
 int main() {
     uWS::App()
-    // Serve qualunque file dalla cartella frontend
+    // Serve file statici
     .get("/*", [](auto *res, auto *req){
         std::string url = std::string(req->getUrl());
         std::string path = "../frontend" + url;
-        if (url.back() == '/') path += "index.html"; // fallback a index.html
+        if (url.back() == '/') path += "index.html";
 
         std::ifstream file(path, std::ios::binary);
         if (file.is_open()) {
@@ -38,14 +55,39 @@ int main() {
             res->end("File non trovato: " + path);
         }
     })
+
     // WebSocket
     .ws<PerConnection>("/*", {
-        .open = [](auto *ws){ std::cout << "Nuova connessione\n"; },
-        .message = [](auto *ws, std::string_view msg, uWS::OpCode op){ ws->send(msg, op); },
-        .close = [](auto *ws, int, std::string_view){ std::cout << "Connessione chiusa\n"; }
+        .open = [](auto *ws) {
+            std::cout << "Nuova connessione\n";
+            auto *data = (PerConnection*) ws->getUserData();
+            data->player = new Player();
+        },
+
+        .message = [](auto *ws, std::string_view msg, uWS::OpCode op) {
+            auto *data = (PerConnection*) ws->getUserData();
+            std::cout << "Ricevuto: " << msg << "\n";
+
+            // Puoi aggiornare la posizione del player
+            // esempio semplice:
+            if (msg == "move_forward;")  data->player->moveForward();
+            if (msg == "move_backward;")     data->player->moveBack();
+            if (msg == "move_left;")     data->player->moveLeft();
+            if (msg == "move_right;")    data->player->moveRight();
+
+            std::string risposta = data->player->getStats();
+            ws->send(risposta, op);
+        },
+
+        .close = [](auto *ws, int, std::string_view) {
+            auto *data = (PerConnection*) ws->getUserData();
+            delete data->player;
+            std::cout << "Connessione chiusa\n";
+        }
     })
-    .listen(9002, [](auto *token){ 
-        if(token) std::cout << "Server attivo su http://localhost:9002/\n"; 
+
+    .listen(9002, [](auto *token){
+        if (token) std::cout << "Server attivo su http://localhost:9002/\n";
     })
     .run();
 }

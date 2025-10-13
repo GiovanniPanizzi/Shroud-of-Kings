@@ -12,10 +12,21 @@
             "three/addons/": "./libs/three.js/examples/jsm/"
           }
         }
-        </script>
+    </script>
+    <style>
+        .join-lobby {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            height: 50px;
+            width: 150px;
+            z-index: 10000;
+        }
+    </style>
 </head>
 <body>
     <script type="module" src="./menu.js"></script>
     <button class="full-screen">full screen</button>
+    <button class="join-lobby"> join lobby </button>
 </body>
 </html>

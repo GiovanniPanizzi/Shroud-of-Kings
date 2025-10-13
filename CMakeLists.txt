@@ -17,6 +17,7 @@ set(SOURCES
     main.cpp
     src/ApiManager.cpp
     src/Lobby.cpp
+    src/Player.cpp
 )
 
 add_executable(bomb ${SOURCES})
