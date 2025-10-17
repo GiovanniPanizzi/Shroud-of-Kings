@@ -65,14 +65,14 @@ int main() {
             auto *data = (PerConnection*) ws->getUserData();
             std::cout << "Ricevuto: " << msg << "\n";
 
-            // Puoi aggiornare la posizione del player
-            // esempio semplice:
             std::vector<std::string> mosse = parseMosse(std::string(msg));
             for(const auto& mossa : mosse) {
                 if (mossa == "move_forward")     data->player->moveForward();
                 if (mossa == "move_backward")    data->player->moveBack();
                 if (mossa == "move_left")        data->player->moveLeft();
                 if (mossa == "move_right")       data->player->moveRight();
+                if (mossa == "jump")             data->player->jump();
+                if (mossa == "shift")            data->player->shift();
             }
             std::string risposta = data->player->getStats();
             ws->send(risposta, op);

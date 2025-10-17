@@ -12,6 +12,7 @@ class Player {
         void moveLeft();
         void moveRight();
         void jump();
+        void shift();
         void moveBack();
         void moveForward();
         void attack();

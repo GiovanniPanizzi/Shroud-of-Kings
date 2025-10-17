@@ -9,7 +9,7 @@ public:
 
     std::string sendHttpRequest(const std::string& endpoint, const std::string& jsonBody);
 
-    void connectWebSocket(const std::string& endpoint);
+    void connectWebSocket(const std::string& endpoint);ww
     void sendWebSocketMessage(const std::string& message);
     void closeWebSocket();
 
